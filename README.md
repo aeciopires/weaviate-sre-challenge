@@ -12,7 +12,11 @@
 
 ## About
 
-Weaviate-Tech challenge Site Reliability Engineer (SRE)
+Weaviate-Tech challenge Site Reliability Engineer (SRE). 
+
+About the challenge: the tasks are hidden in this repository. Credits to: Weaviate
+
+About the results: see [RESULTS.md](RESULTS.md) and [PRESENTATION.md](PRESENTATION.md) files.
 
 ## Contributing
 

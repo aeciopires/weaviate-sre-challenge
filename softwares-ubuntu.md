@@ -8,27 +8,19 @@
 - [awscli](#awscli)
 - [docker](#docker)
 - [docker-compose](#docker-compose)
-- [gcloud](#gcloud)
 - [Helm](#helm)
 - [helm-docs](#helm-docs)
 - [helm-diff - Plugin](#helm-diff---plugin)
 - [helm-secrets - Plugin](#helm-secrets---plugin)
 - [kubectl](#kubectl)
-- [Kubectl plugins](#kubectl-plugins)
-  - [krew](#krew)
   - [kubectx e kubens](#kubectx-e-kubens)
 - [Custom Terminal Prompt](#custom-terminal-prompt)
   - [bash\_prompt](#bash_prompt)
 - [Sops](#sops)
 - [terraform e tfenv](#terraform-e-tfenv)
 - [terraform-docs](#terraform-docs)
-- [terragrunt e tgenv](#terragrunt-e-tgenv)
-  - [Known issue](#known-issue)
-- [\[OPTIONAL\] Aliases](#optional-aliases)
-  - [bashrc](#bashrc)
-- [\[OPTIONAL\] kind](#optional-kind)
-- [\[OPTIONAL\] trivy](#optional-trivy)
-  - [Installing trivy using Docker](#installing-trivy-using-docker)
+- [kind](#kind)
+- [Trivy](#trivy)
 
 <!-- TOC -->
 
@@ -198,50 +190,6 @@ chmod +x /usr/local/bin/docker-compose
 exit
 ```
 
-# gcloud
-
-> Before continuing, if you have awscli installed, remove it with the following commands:
-
-```bash
-sudo apt remove google-cloud-sdk
-sudo rm /etc/apt/sources.list.d/google-cloud-sdk.list
-```
-
-> Before proceeding, make sure you have installed the command [asdf](#asdf).
-
-```bash
-VERSION="508.0.0"
-
-asdf plugin list all | grep gcloud
-asdf plugin add gcloud https://github.com/jthegedus/asdf-gcloud.git
-asdf latest gcloud
-
-asdf install gcloud $VERSION
-asdf list gcloud
-
-# Definindo a versão padrão
-asdf global gcloud $VERSION
-asdf list gcloud
-
-#Login using gcloud:
-gcloud init
-
-gcloud auth login
-gcloud auth application-default login
-```
-
-References:
-- https://cloud.google.com/sdk/install
-- https://cloud.google.com/sdk/docs/downloads-apt-get
-- https://cloud.google.com/docs/authentication/gcloud
-- https://cloud.google.com/docs/authentication/getting-started
-- https://console.cloud.google.com/apis/credentials/serviceaccountkey
-- https://cloud.google.com/sdk/gcloud/reference/config/set
-- https://code-maven.com/gcloud
-- https://gist.github.com/pydevops/cffbd3c694d599c6ca18342d3625af97
-- https://blog.realkinetic.com/using-google-cloud-service-accounts-on-gke-e0ca4b81b9a2
-- https://www.the-swamp.info/blog/configuring-gcloud-multiple-projects/
-
 # Helm
 
 Run the following commands to install helm:
@@ -347,37 +295,6 @@ asdf global kubectl $VERSION_OPTION_1
 asdf list kubectl
 
 sudo ln -s $HOME/.asdf/shims/kubectl /usr/local/bin/kubectl
-```
-
-# Kubectl plugins
-
-Listed below are some useful plugins for Kubectl.
-
-## krew
-
-Documentation:
-
-- <https://github.com/kubernetes-sigs/krew/>
-- <https://krew.sigs.k8s.io/docs/user-guide/setup/install/>
-
-```bash
-(
-  set -x; cd "$(mktemp -d)" &&
-  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-  KREW="krew-${OS}_${ARCH}" &&
-  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
-  tar zxvf "${KREW}.tar.gz" &&
-  ./"${KREW}" install krew
-)
-
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-
-cat << FOE >> ~/.bashrc
-
-#krew
-export PATH="\${KREW_ROOT:-\$HOME/.krew}/bin:\$PATH"
-FOE
 ```
 
 ## kubectx e kubens
@@ -549,166 +466,7 @@ rm terraform-docs.tar.gz
 terraform-docs --version
 ```
 
-# terragrunt e tgenv
-
-Run the following commands to install tgenv, Terragrunt's version controller.
-
-Documentation:
-
-- <https://github.com/cunymatthieu/tgenv>
-- <https://blog.gruntwork.io/how-to-manage-multiple-versions-of-terragrunt-and-terraform-as-a-team-in-your-iac-project-da5b59209f2d>
-
-```bash
-cd $HOME
-git clone https://github.com/cunymatthieu/tgenv.git ~/.tgenv
-sudo ln -s ~/.tgenv/bin/* /usr/local/bin
-```
-
-## Known issue
-
-There is an issue in tgenv versions where very old versions of terragrunt are not remotely installed/listed. This occurs due to a query used in the code <https://github.com/cunymatthieu/tgenv/blob/master/libexec/tgenv-list-remote#L12> that uses GitHub's API. For this, we have two possible workarounds
-
-Workaround 3 (Fix proposed and revised in open PR):
-<https://github.com/cunymatthieu/tgenv/pull/15/files>
-
-Change the file ``~/.tgenv/libexec/tgenv-list-remote`` so that it looks exactly like the following:
-
-```bash
-#!/usr/bin/env bash
-set -e
-
-[ -n "${TGENV_DEBUG}" ] && set -x
-source "${TGENV_ROOT}/libexec/helpers"
-
-if [ ${#} -ne 0 ];then
-  echo "usage: tgenv list-remote" 1>&2
-  exit 1
-fi
-
-GITHUB_API_HEADER_ACCEPT="Accept: application/vnd.github.v3+json"
-
-temp=`basename $0`
-TMPFILE=`mktemp /tmp/${temp}.XXXXXX` || exit 1
-
-function rest_call {
-    curl --tlsv1.2 -sf $1 -H "${GITHUB_API_HEADER_ACCEPT}" | sed -e 's/^\[$//g' -e 's/^\]$/,/g' >> $TMPFILE
-}
-
-# single page result-s (no pagination), have no Link: section, the grep result is empty
-last_page=`curl -I --tlsv1.2 -s "https://api.github.com/repos/gruntwork-io/terragrunt/tags?per_page=100" -H "${GITHUB_API_HEADER_ACCEPT}" | grep '^link:' | sed -e 's/^link:.*page=//g' -e 's/>.*$//g'`
-
-# does this result use pagination?
-if [ -z "$last_page" ]; then
-    # no - this result has only one page
-    rest_call "https://api.github.com/repos/gruntwork-io/terragrunt/tags?per_page=100"
-else
-    # yes - this result is on multiple pages
-    for p in `seq 1 $last_page`; do
-        rest_call "https://api.github.com/repos/gruntwork-io/terragrunt/tags?per_page=100&page=$p"
-    done
-fi
-
-return_code=$?
-if [ $return_code -eq 22 ];then
-  warn_and_continue "Failed to get list verion on $link_release"
-  print=`cat ${TGENV_ROOT}/list_all_versions_offline`
-fi
-
-cat $TMPFILE | grep -o -E "[0-9]+\.[0-9]+\.[0-9]+(-(rc|beta)[0-9]+)?" | uniq
-```
-
-List the versions that can be installed:
-
-```bash
-tgenv list-remote
-```
-
-Install the following versions of Terragrunt using tgenv:
-
-```bash
-tgenv install 0.72.6
-```
-
-List the installed versions:
-
-```bash
-tgenv list
-```
-
-Set the default to a certain version:
-
-```bash
-tgenv use 0.72.6
-```
-
-To uninstall a terraform version with tfenv, use the following command:
-
-```bash
-tgenv uninstall <VERSAO>
-```
-
-Only when developing code that uses terragrunt can you force the project to use a specific version:
-
-Create the ``.terragrunt-version`` file in the project root with the desired version number. Example:
-
-```bash
-cat .terragrunt-version
-0.72.6
-```
-
-# [OPTIONAL] Aliases
-
-## bashrc
-
-Useful aliases to be registered in the ``$HOME/.bashrc`` file.
-
-> After inclusion, run the command ``source ~/.bashrc`` to reflect the changes.
-
-```bash
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-alias aws_docker='docker run --rm -ti -v ~/.aws:/root/.aws -v $(pwd):/aws public.ecr.aws/aws-cli/aws-cli:2.22.28'
-alias bat='bat --theme ansi'
-alias connect_eks='aws eks --region CHANGE_REGION update-kubeconfig --name CHANGE_CLUSTER --profile CHANGE_PROFILE'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias grep='grep --color=auto'
-alias k='kubectl'
-source <(kubectl completion bash)
-export PATH="${PATH}:${HOME}/.krew/bin"
-alias kubectl='kubecolor'
-alias kmongo='kubectl run --rm -it mongoshell-$(< /dev/urandom tr -dc a-z-0-9 | head -c${1:-4}) --image=mongo:4.0.28 -n default -- bash'
-alias kmysql5='kubectl run --rm -it mysql5-$(< /dev/urandom tr -dc a-z-0-9 | head -c${1:-4}) --image=mysql:5.7 -n default -- bash'
-alias kmysql8='kubectl run --rm -it mysql8-$(< /dev/urandom tr -dc a-z-0-9 | head -c${1:-4}) --image=mysql:8.0 -n default -- bash'
-alias kredis='kubectl run --rm -it redis-cli-$(< /dev/urandom tr -dc a-z-0-9 | head -c${1:-4}) --image=redis:latest -n default -- bash'
-alias kpgsql14='kubectl run --rm -it pgsql14-$(< /dev/urandom tr -dc a-z-0-9 | head -c${1:-4}) --image=postgres:14 -n default -- bash'
-alias kssh='kubectl run --rm -it ssh-agent-$(< /dev/urandom tr -dc a-z-0-9 | head -c${1:-4}) --image=kroniak/ssh-client -n default -- bash'
-alias l='ls -CF'
-alias la='ls -A'
-alias live='curl parrot.live'
-alias ll='ls -alF'
-alias ls='ls --color=auto'
-alias nettools='kubectl run --rm -it nettools-\$(< /dev/urandom tr -dc a-z-0-9 | head -c${1:-4}) --image=aeciopires/nettools:2.0.0 -n NAMESPACE'
-alias randompass='< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16}'
-# Ubuntu 22.04/24.04
-alias set-dns-cabeado='sudo resolvectl dns enp7s0 1.1.1.1'
-alias set-dns-wifi='sudo resolvectl dns wlp6s0 1.1.1.1'
-alias show-hidden-files='du -sch .[!.]* * |sort -h'
-alias ssm='aws ssm start-session --target CHANGE_EC2_ID --region CHANGE_REGION --profile CHANGE_PROFILE'
-alias terradocs='terraform-docs markdown table . > README.md'
-alias alertmanager='aws eks --region CHANGE_REGION update-kubeconfig --name CHANGE_CLUSTER --profile CHANGE_PROFILE && kubectl port-forward alertmanager-monitor-alertmanager-0 9093:9093 -n monitoring ; kubectx -'
-alias prometheus='kubectl port-forward prometheus-monitor-prometheus-0 9090:9090 -n monitoring'
-alias sc="source $HOME/.bashrc"
-alias randompass='pwgen 16 1'
-alias randompass2='date +%s | sha3sum | base64 | head -c 12; echo'
-alias sc="source $HOME/.bashrc"
-alias python=python3
-alias pip=pip3
-alias kubepug="kubectl-depreciations"
-alias kind_create="kind create cluster --name kind-multinodes --config $HOME/kind-3nodes.yaml"
-alias kind_delete="kind delete clusters \$(kind get clusters)"
-```
-
-# [OPTIONAL] kind
+# kind
 
 Kind (Kubernetes in Docker) is another alternative for running Kubernetes in a local environment for testing and learning, but it is not recommended for production use.
 
@@ -801,28 +559,7 @@ References:
 - <https://github.com/kubernetes-sigs/kind/releases>
 - <https://kubernetes.io/blog/2020/05/21/wsl-docker-kubernetes-on-the-windows-desktop/#kind-kubernetes-made-easy-in-a-container>
 
-# [OPTIONAL] trivy
-
-Installing trivy via asdf
-
-> Before proceeding, make sure you have installed the command [asdf](#asdf).
-
-```bash
-VERSION="0.58.0"
-
-asdf plugin list all | grep trivy
-asdf plugin add trivy https://github.com/zufardhiyaulhaq/asdf-trivy.git
-asdf latest trivy
-
-asdf install trivy $VERSION
-asdf list trivy
-
-# Setting the global version
-asdf global trivy $VERSION
-asdf list trivy
-```
-
-## Installing trivy using Docker
+# Trivy
 
 To scan Docker images for vulnerabilities locally, before uploading to Docker Hub, ECR, GCR or another remote registry, you can use trivy: <https://github.com/aquasecurity/trivy>
 
