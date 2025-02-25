@@ -28,7 +28,7 @@ terraform {
     profile        = "myaccount"
   }
 
-  # SUGGESTION-3 => The original code does not a required providers block.
+  # SUGGESTION-3 => The original code does not have a required providers block.
   required_version = "~> 1.10"
 
   required_providers {
