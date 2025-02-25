@@ -4,6 +4,7 @@
 - [health-check-system](#health-check-system)
 - [About](#about)
 - [Requirements](#requirements)
+- [Show me the code](#show-me-the-code)
 - [How to use](#how-to-use)
   - [Using make](#using-make)
   - [Using docker-compose](#using-docker-compose)
@@ -22,6 +23,10 @@ This is ``myhealthcheck`` app developed in [Python](https://www.python.org) to c
 - Tested only in Ubuntu 24.04/22.04 and MacOs 14.6.1 in ``amd64`` architecture.
 
 > ATTENTION!!! The ``kube-pires`` application has support to ``linux/amd64`` only. If you use other operating system or architecture, maybe you need use other application to be monitored.
+
+# Show me the code
+
+See [app/main.py](app/main.py) file.
 
 # How to use
 
