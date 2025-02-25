@@ -87,6 +87,8 @@ docker-compose down
 - Run manually only ``myhealthchek`` program:
 
 ```bash
+pip install -f requirements.txt
+
 python app/main.py
 
 # Or

@@ -14,9 +14,10 @@ WORKDIR /app
 # Copy files to image
 COPY app/main.py /app
 COPY app/.env /app
+COPY app/requirements.txt /app/requirements.txt
 
 # Install dependencies
-RUN pip install requests python-dotenv
+RUN pip install -r requirements.txt
 
 # Start program during container creation
 CMD ["python", "main.py"]
