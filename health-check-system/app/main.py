@@ -1,8 +1,3 @@
-#----------------------
-# ATTENTION!!! I am not a software developer. I made this code using ChatGPT
-# This program may not have good practices or may have critical bugs, but it is the best I can do at this time
-#----------------------
-
 import os
 import time
 import requests
