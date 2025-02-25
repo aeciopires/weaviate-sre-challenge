@@ -19,7 +19,9 @@ This is ``myhealthcheck`` app developed in [Python](https://www.python.org) to c
 # Requirements
 
 - Install all packages and binaries following the instructions on the [REQUIREMENTS.md](../REQUIREMENTS.md) file.
-- Tested only in Ubuntu 24.04/22.04 and MacOs 14.6.1
+- Tested only in Ubuntu 24.04/22.04 and MacOs 14.6.1 in ``amd64`` architecture.
+
+> ATTENTION!!! The ``kube-pires`` application has support to ``linux/amd64`` only. If you use other operating system or architecture, maybe you need use other application to be monitored.
 
 # How to use
 
