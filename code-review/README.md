@@ -23,11 +23,12 @@ Create EKS Kubernetes cluster using Terraform code.
 # Structure of directories
 
 ```bash
-├── code-review      # Directory with Terraform code
-│   ├── main.tf      # Terraform resouces
-│   ├── output.tf    # Terraform output
-│   ├── variables.tf # Terraform variables
-└── README.md        # This documentation
+├── code-review             # Directory with Terraform code
+│   ├── .terraform-version  # Terraform version managed by tf-env binary
+│   ├── main.tf             # Terraform resouces
+│   ├── output.tf           # Terraform output
+│   ├── variables.tf        # Terraform variables
+└── README.md               # This documentation
 ```
 
 # How to test
