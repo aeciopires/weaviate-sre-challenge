@@ -30,7 +30,7 @@ About the challenge: the tasks are hidden in this repository. Credits to: Weavia
 
 ### Coding challenge
 
-- See [code-health-check-system/README.md](code-health-check-system/README.md) file.
+- See [health-check-system/README.md](health-check-system/README.md) file.
 
 ### Post-Mortem report
 

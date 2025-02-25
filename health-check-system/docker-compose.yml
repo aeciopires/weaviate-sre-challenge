@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+  myhealthcheck:
+    container_name: myhealthcheck
+    build:
+      context: '.'
+    image: aeciopires/myhealthcheck:1.0.0
+    env_file:
+      - app/.env
+    depends_on:
+      - "kube-pires"
+    networks:
+      - mynet
+  kube-pires:
+    container_name: kube-pires
+    image: aeciopires/kube-pires:1.0.0
+    # New sintax for declare ports for docker-compose 3.2 or major
+    # https://docs.docker.com/compose/compose-file/#ports
+    ports:
+      - target: 3000    # container
+        published: 3000 # host
+        protocol: tcp
+        mode: bridge
+    restart: always
+    networks:
+      - mynet
+
+networks:
+  mynet:
+    driver: "bridge"

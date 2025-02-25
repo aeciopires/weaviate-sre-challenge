@@ -1,8 +1,8 @@
 <!-- TOC -->
 
-- [Ubuntu](#ubuntu)
-  - [Essential](#essential)
-  - [Optionals](#optionals)
+- [MacOS](#macos)
+  - [Homebrew](#homebrew)
+  - [Essentials](#essentials)
 - [asdf](#asdf)
 - [awscli](#awscli)
 - [docker](#docker)
@@ -11,35 +11,55 @@
 
 <!-- TOC -->
 
-# Ubuntu
+# MacOS
 
-## Essential
+## Homebrew
 
-Run the following commands on Ubuntu 24.04/22.02:
-
-```bash
-sudo apt install -y vim telnet netcat-openbsd git elinks curl wget net-tools python3 python3-pip python3-venv default-jdk jq make
-```
-
-For Python "3.10.*" run the following command to create the symbolic link:
+Install Homebrew with the following command:
 
 ```bash
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> "/Users/$USER/.bash_profile"
+
+eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
 
-For Python "3.12.*" run the following command to create the symbolic link:
+Reference: https://brew.sh/
+
+## Essentials
+
+Run the following commands:
 
 ```bash
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+software --install rosetta --agree-to-license
+
+brew install vim telnet netcat git elinks curl wget net-tools python3 openjdk jq make coreutils visual-studio-code
+
+echo 'export PATH="/opt/homebrew/opt/curl/bin:\$PATH"' >> "/User/$USER/.bash_profile"
+
+export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
+
+sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+
+echo 'export PATH="/opt/homebrew/opt/openjdk/bin:\$PATH"' >> "/User/$USER/.bash_profile"
+
+export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
+
+echo 'export PATH="/opt/homebrew/opt/make/libexec/gnubin:\$PATH"' >> "/User/$USER/.bash_profile"
+
+export PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
+
+alias python=python3
+alias pip=pip3
 ```
 
-## Optionals
+Install python3-pip following the instructions on the page: https://docs.brew.sh/Homebrew-and-Python
 
 Install the following software:
 
-- Google Chrome
-- Visual Code: https://code.visualstudio.com
-  - Ubuntu install: https://code.visualstudio.com/docs/setup/linux
+- Google Chrome: https://support.google.com/chrome/answer/95346?hl=pt-BR&co=GENIE.Platform%3DDesktop#zippy=%2Cmac
   - Plugins for Visual Code
   - Instructions to export/import plugins: https://stackoverflow.com/questions/35773299/how-can-you-export-the-visual-studio-code-extension-list
   - docker: https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker (Requires installation of the docker command shown in the following sections).
@@ -72,9 +92,9 @@ ASDF_VERSION="v0.15.0"
 git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch $ASDF_VERSION
 
 # Adding $HOME/.bashrc
-echo ". \"\$HOME/.asdf/asdf.sh\"" >> ~/.bashrc
-echo ". \"\$HOME/.asdf/completions/asdf.bash\"" >> ~/.bashrc
-source ~/.bashrc
+echo ". \"\$HOME/.asdf/asdf.sh\"" >> ~/.bash_profile
+echo ". \"\$HOME/.asdf/completions/asdf.bash\"" >> ~/.bash_profile
+source ~/.bash_profile
 ```
 
 Reference: https://asdf-vm.com/guide/introduction.html
@@ -119,35 +139,29 @@ Reference:
 
 # docker
 
-Install Docker CE (Community Edition) following the instructions on the page: <https://docs.docker.com/engine/install/ubuntu/>.
+Install Docker CE (Community Edition) following the instructions on the page: https://docs.docker.com/desktop/install/mac-install/.
+
+Run the following commands:
+
+> Before proceeding, make sure you have installed the command [Homebrew](#homebrew).
 
 ```bash
-sudo apt update
-sudo apt install -y acl
-curl -fsSL https://get.docker.com -o get-docker.sh;
-sudo sh get-docker.sh;
-# Utilizando docker sem sudo
-sudo usermod -aG docker $USER;
-sudo setfacl -m user:$USER:rw /var/run/docker.sock
+brew install --cask docker
+brew install docker-machine
 ```
 
-Reference: <https://docs.docker.com/engine/install/linux-postinstall/#configure-docker-to-start-on-boot>
+Reference: https://stackoverflow.com/questions/44084846/cannot-connect-to-the-docker-daemon-on-macos
 
 # docker-compose
 
-Documentation: <https://docs.docker.com/compose/>
+More info: https://docs.docker.com/compose/install/
+
+Run the following command:
+
+> Before proceeding, make sure you have installed the command [Homebrew](#homebrew).
 
 ```bash
-sudo su
-COMPOSE_VERSION=v2.33.1
-
-sudo curl -L "https://github.com/docker/compose/releases/download/$COMPOSE_VERSION/docker-compose-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)" -o /usr/local/bin/docker-compose;
-
-chmod +x /usr/local/bin/docker-compose;
-
-/usr/local/bin/docker-compose version
-
-exit
+brew install docker-compose
 ```
 
 # terraform e tfenv
@@ -156,10 +170,10 @@ Run the following commands to install ``tfenv``, Terraform version controller.
 
 Documentation: <https://github.com/tfutils/tfenv>
 
+> Before proceeding, make sure you have installed the command [Homebrew](#homebrew).
+
 ```bash
-cd $HOME
-git clone https://github.com/tfutils/tfenv.git ~/.tfenv
-sudo ln -s ~/.tfenv/bin/* /usr/local/bin
+brew install tfenv
 ```
 
 List versions that can be installed:
@@ -168,7 +182,7 @@ List versions that can be installed:
 tfenv list-remote
 ```
 
-Install the following versions of Terraform using tfenv:
+Instale as seguiInstall the following versions of Terraform using tfenv:
 
 ```bash
 tfenv install 1.10.5
