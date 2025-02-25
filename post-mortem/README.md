@@ -18,8 +18,8 @@
 
 # Post-Mortem Analysis: Vault dependency incident
 
-Date: February 25, 2025
-Incident ID: AECIO-2025-02-25-001
+- Date: February 25, 2025
+- Incident ID: AECIO-2025-02-25-001
 
 ## Executive Summary
 
