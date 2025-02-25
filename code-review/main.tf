@@ -19,18 +19,13 @@
 # Reference: https://developer.hashicorp.com/terraform/language/backend/s3
 terraform {
   backend "s3" {
-    bucket         = local.bucket_remote_tfstate
-    dynamodb_table = local.dynamodb_remote_tfstate
-    key            = "${var.region}/${var.eks_cluster_name}/terraform.tfstate"
-    region         = var.region
+    # The AWS-S3 bucket and DynamoDB must to be created previosly
+    bucket         = "terraform-remote-state-gyr4"
+    dynamodb_table = "terraform-state-lock-dynamo-gyr4"
+    key            = "customer-gyr4/terraform.tfstate"
+    region         = "us-east-2"
     encrypt        = true
-    profile        = var.aws_profile
-    s3_bucket_tags = merge(
-      local.aws_default_tags,
-    )
-    dynamodb_table_tags = merge(
-      local.aws_default_tags,
-    )
+    profile        = "myaccount"
   }
 
   # SUGGESTION-3 => The original code does not a required providers block.
@@ -61,6 +56,8 @@ provider "aws" {
   profile = var.aws_profile
   region  = var.region
 
+  # SUGGESTION-5 => The default_tags block may not be supported depending on the version of the AWS provider you are using.
+  # But in this case I use a new version
   default_tags {
     tags = local.aws_default_tags
   }
@@ -78,20 +75,21 @@ provider "kubernetes" {
 }
 
 
-# This is correct according documentation: https://registry.terraform.io/providers/hashicorp/helm/latest/docs#exec-plugins
+# SUGGESTION-6 => The original code uses v1alpha1 API version. But according the documentation: https://registry.terraform.io/providers/hashicorp/helm/latest/docs#exec-plugins
+# The "helm" provider needs to upgrade to use v1beta1 API.
 provider "helm" {
   kubernetes {
     host                   = data.aws_eks_cluster.main.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.main.certificate_authority[0].data)
     exec {
-      api_version = "client.authentication.k8s.io/v1alpha1"
+      api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       args        = ["eks", "get-token", "--cluster-name", var.eks_cluster_name]
     }
   }
 }
 
-# SUGGESTION-5 => This code is correct according this doc: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster.html
+# SUGGESTION-7 => This code is correct according this doc: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster.html
 # But this data statement is required for addon configuration with kubernetes and helm providers where EKS cluster does not exist yet to avoid race condition.
 # Known error see more in the WARNING block: https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs#stacking-with-managed-kubernetes-cluster-resources
 # The replace is used just to get the cluster name from an output that's only known after the cluster creation (module.weaviate_eks.cluster_name is known before the apply), which sets an implicit dependency.
@@ -114,7 +112,7 @@ locals {
   customer_identifier         = trimprefix(var.eks_cluster_name, "wv-")
   customer_cluster_identifier = "prod-dedicated-enterprise"
 
-  vpc_id                      = "CHANGE_HERE"
+  vpc_id = "CHANGE_HERE"
   vpc_public_subnet_tags = {
     "type"                                          = "public",
     "kubernetes.io/role/elb"                        = "1",      # For use with ALB of type internet
@@ -127,9 +125,6 @@ locals {
     "kubernetes.io/cluster/${var.eks_cluster_name}"  = "shared",                  # For use with node autoscaling
     "karpenter.sh/discovery/${var.eks_cluster_name}" = "${var.eks_cluster_name}", # For use with Karpenter
   }
-
-  bucket_remote_tfstate   = "terraform-remote-state-${var.aws_account_id}"
-  dynamodb_remote_tfstate = "terraform-state-lock-dynamo-${var.aws_account_id}"
 
   # See bellow pages for review access policy permissions
   # https://docs.aws.amazon.com/eks/latest/userguide/access-policy-permissions.html
@@ -261,7 +256,7 @@ locals {
 # EKS Cluster and VPC Configuration
 ################################################################################
 
-# SUGGESTION-6 => Used public module to create VPC
+# SUGGESTION-8 => Used public module to create VPC
 module "weaviate_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.18.0"
@@ -286,7 +281,7 @@ module "weaviate_vpc" {
 
 }
 
-# SUGGESTION-7 => Used public module to create EKS 1.32
+# SUGGESTION-9 => Used public module to create EKS 1.32
 module "weaviate_eks" {
   depends_on = [
     module.weaviate_vpc,
@@ -347,7 +342,7 @@ module "weaviate_eks" {
   # More options in page: https://github.com/terraform-aws-modules/terraform-aws-eks/tree/master/modules/eks-managed-node-group#inputs
   eks_managed_node_groups = {
     "on-demand" = {
-      name          = "${var.eks_cluster_shortname}-ondemand"
+      name          = "${var.eks_cluster_name}-ondemand"
       capacity_type = "ON_DEMAND"
       key_name      = module.weaviate_keypair.key_pair_name
       min_size      = 2
@@ -441,10 +436,12 @@ module "weaviate_eks" {
 # High Availability Setup for Weaviate
 ################################################################################
 
-# SUGGESTION-8 => Where is the ./modules/weaviate code? Whithout this code, I can not create the infrastructure correctly.
+# SUGGESTION-10 => Where is the ./modules/weaviate code? Whithout this code, I can not create the infrastructure correctly.
 module "weaviate_helm" {
 
-  # SUGGESTION-9 => Is good pratice put depends_on block in begin of resource configuration to indentify easier the dependencies.
+  # SUGGESTION-11 => Is good pratice put depends_on block in begin of resource configuration to indentify easier the dependencies.
+  # This depends_on may be unnecessary because Terraform manages dependencies implicitly.
+  # But in this case, I keep this block for a configuration more explicited.
   depends_on = [
     kubernetes_namespace.weaviate-namespace
   ]
@@ -458,7 +455,9 @@ module "weaviate_helm" {
 
 
   # Weaviate-specific configurations
-  weaviate_replication_factor = 1
+  # SUGGESTION-12 => For high availability (HA), 1 replica is not sufficient. In original code, ideally it should be at least equal to 2
+  # I changed value to 2
+  weaviate_replication_factor = 2
 
 
   # Node Affinity and Anti-Affinity (to spread pods across AZs)
@@ -480,7 +479,6 @@ module "weaviate_helm" {
       ]
     }
   }
-
 
   # Tolerations (if needed based on your taints setup)
   tolerations = [
@@ -510,7 +508,7 @@ module "weaviate_helm" {
 
 # What additional modules should be added here?
 
-# SUGGESTION-10 => Used public module to manage EKS blueprints
+# SUGGESTION-13 => Used public module to manage EKS blueprints
 module "weaviate_eks_addon_blueprints" {
   depends_on = [
     module.weaviate_eks,
@@ -569,7 +567,7 @@ module "weaviate_eks_addon_blueprints" {
 
 }
 
-# SUGGESTION-11 => Used public module to create KMS
+# SUGGESTION-14 => Used public module to create KMS
 module "weaviate_kms" {
   source  = "terraform-aws-modules/kms/aws"
   version = "3.1.1"
@@ -585,15 +583,14 @@ module "weaviate_kms" {
   tags                    = local.aws_default_tags
 }
 
-# SUGGESTION-12 => Used public module to create EC2 keypair
+# SUGGESTION-15 => Used public module to create EC2 keypair
 module "weaviate_keypair" {
   source  = "terraform-aws-modules/key-pair/aws"
   version = "2.0.3"
 
-  create_key_pair = true
-  key_name        = var.key_name
-  public_key      = var.public_key_content
-  tags            = local.aws_default_tags
+  key_name   = var.key_name
+  public_key = var.public_key_content
+  tags       = local.aws_default_tags
 }
 
 ################################################################################

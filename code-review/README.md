@@ -41,6 +41,8 @@ export AWS_ACCOUNT_ID='CHANGE_HERE'
 export AWS_REGION='us-east-2'
 export PREFIX_CLUSTER_NAME='cluster1'
 export CLUSTER_NAME="cluster1-${SUFFIX}"
+export BUCKET_NAME="terraform-remote-state-${SUFFIX}"
+export DYNAMODB_NAME="terraform-state-lock-dynamo-${SUFFIX}"
 ```
 
 - Change values in ``variables.tf`` file.
@@ -70,6 +72,13 @@ Run the ``terraform`` commands.
 ```bash
 cd ~/git/weaviate-sre-challenge/code-review/
 
+# Creating AWS-S3 bucket in the first time
+aws s3 mb "s3://${BUCKET_NAME}" --region $AWS_REGION --profile $AWS_PROFILE
+
+# Creating AWS-DynamoDB in the first time
+aws dynamodb create-table --table-name "$DYNAMODB_NAME" --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 --region $AWS_REGION --profile $AWS_PROFILE
+
+# Run terraform commands
 terraform validate
 terraform plan
 terraform apply
@@ -89,7 +98,7 @@ terraform destroy
 - Run the command:
 
 ```bash
-aws s3 rb "s3://terraform-remote-state-${AWS_ACCOUNT_ID}" \
+aws s3 rb "s3://${BUCKET_NAME}" \
   --force \
   --recursive \
   --region "$AWS_REGION" \
@@ -98,7 +107,7 @@ aws s3 rb "s3://terraform-remote-state-${AWS_ACCOUNT_ID}" \
 # or
 
 aws s3api delete-bucket \
-  --bucket "terraform-remote-state-${AWS_ACCOUNT_ID}" \
+  --bucket "$BUCKET_NAME" \
   --region "$AWS_REGION" \
   --profile myaccount
 ```
@@ -114,7 +123,7 @@ References:
 
 ```bash
 aws dynamodb delete-table \
-  --table-name "terraform-state-lock-dynamo-${AWS_ACCOUNT_ID}" \
+  --table-name "${DYNAMODB_NAME}" \
   --region "$AWS_REGION" \
   --profile myaccount
 ```

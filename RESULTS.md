@@ -16,8 +16,8 @@
 
 ## Terraform code review
 
-See [code-review/main.tf](code-review/main.tf) fixed. Pay attention in lines started with ``# SUGGESTION`` statement
-See [code-review/README.md](code-review/README.md) to run the code fixed.
+- See [code-review/main.tf](code-review/main.tf) fixed. There are 16 suggestions to improvements. Pay attention in lines started with ``# SUGGESTION`` statement
+- See [code-review/README.md](code-review/README.md) to run the code fixed.
 
 ## Coding challenge
 
