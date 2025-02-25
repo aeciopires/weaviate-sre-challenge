@@ -3,7 +3,7 @@
 # Reference: https://github.com/aeciopires/adsoft
 #----------------------
 
-# SUGGESTION-0 => The original code have not a variables.tf to customize the values according differents environments.
+# SUGGESTION-0 => The original code have not a variables.tf file to customize the values according different environments.
 # I created the variables.tf and output.tf files, to respectively pass arguments and see results
 
 # SUGGESTION-1 => The original code not follow the style code like identation recomended by official documentation

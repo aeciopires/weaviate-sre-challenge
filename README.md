@@ -4,6 +4,11 @@
 
 - [weaviate-sre-challenge](#weaviate-sre-challenge)
   - [About](#about)
+  - [Tasks](#tasks)
+    - [Terraform code review](#terraform-code-review)
+    - [Coding challenge](#coding-challenge)
+    - [Post-Mortem report](#post-mortem-report)
+    - [Presentation](#presentation)
   - [Contributing](#contributing)
   - [Maintainers](#maintainers)
   - [License](#license)
@@ -16,7 +21,24 @@ Weaviate-Tech challenge Site Reliability Engineer (SRE).
 
 About the challenge: the tasks are hidden in this repository. Credits to: Weaviate
 
-About the results: see [RESULTS.md](RESULTS.md) and [PRESENTATION.md](PRESENTATION.md) files.
+## Tasks
+
+### Terraform code review
+
+- See [code-review/main.tf](code-review/main.tf) fixed. There are 16 suggestions to improvements. Pay attention in lines started with ``# SUGGESTION`` statement.
+- See [code-review/README.md](code-review/README.md) to run the code fixed.
+
+### Coding challenge
+
+- See [code-health-check-system/README.md](code-health-check-system/README.md) file.
+
+### Post-Mortem report
+
+- See [post-mortem/README.md](post-mortem/README.md) file.
+
+### Presentation
+
+- See [presentation/README.md](presentation/README.md) file.
 
 ## Contributing
 
