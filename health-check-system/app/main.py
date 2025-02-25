@@ -8,12 +8,22 @@ import time
 import requests
 import logging
 import json
+import argparse
+from dotenv import load_dotenv
+
+# Parse arguments
+parser = argparse.ArgumentParser(description="Health Check Script")
+parser.add_argument("-f", "--file", type=str, default=".env", help="Path to .env file")
+args = parser.parse_args()
+
+# Load environment variables from specified .env file
+load_dotenv(args.file)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load configuration from environment variables or default values
-HEALTH_ENDPOINT = os.getenv("HEALTH_ENDPOINT", "http://localhost:3000/health")
+HEALTH_ENDPOINT = os.getenv("HEALTH_ENDPOINT", "http://localhost:8000/health")
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", 300))  # Default: 5 minutes
 RESPONSE_TIME_THRESHOLD = float(os.getenv("RESPONSE_TIME_THRESHOLD", 3.0))
 

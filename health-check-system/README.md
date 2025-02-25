@@ -8,8 +8,7 @@
   - [Using make](#using-make)
   - [Using docker-compose](#using-docker-compose)
   - [Using python](#using-python)
-- [Build image](#build-image)
-- [Publish image](#publish-image)
+- [Build and publish image](#build-and-publish-image)
 
 <!-- TOC -->
 
@@ -82,20 +81,16 @@ docker-compose down
 
 ```bash
 python app/main.py
+
+# Or
+
+python app/main.py -f app/.env
 ```
 
-# Build image
+# Build and publish image
 
 - Build image of ``myhealthchek`` program:
 
 ```bash
 make image
-```
-
-# Publish image
-
-- Publish image of ``myhealthchek`` program:
-
-```bash
-make publish
 ```

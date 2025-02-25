@@ -49,6 +49,7 @@ SUPPORTED_PLATFORMS="linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64"
 # https://stackoverflow.com/questions/589276/how-can-i-use-bash-syntax-in-makefile-targets
 # https://til.hashrocket.com/posts/k3kjqxtppx-escape-dollar-sign-on-makefiles
 # https://stackoverflow.com/questions/5618615/check-if-a-program-exists-from-a-makefile
+# https://www.docker.com/blog/multi-arch-build-and-images-the-simple-way/
 
 requirements:
 REQUIRED_PACKAGES := docker docker-compose
@@ -67,8 +68,8 @@ image:
 	docker login -u "$${DOCKER_HUB_ACCOUNT}" -p "$${DOCKER_HUB_PASSWORD}"
 
 	docker buildx create --use --platform="${SUPPORTED_PLATFORMS}" --name multi-platform-builder
-	docker buildx build --platform="${SUPPORTED_PLATFORMS}" -t "$${DOCKER_HUB_ACCOUNT}/${APP_NAME}:${VERSION}" --push .
-	docker buildx build --platform="${SUPPORTED_PLATFORMS}" -t "$${DOCKER_HUB_ACCOUNT}/${APP_NAME}:latest" --push .
+	docker buildx build --push --platform="${SUPPORTED_PLATFORMS}" -t "$${DOCKER_HUB_ACCOUNT}/${APP_NAME}:${VERSION}" .
+	docker buildx build --push --platform="${SUPPORTED_PLATFORMS}" -t "$${DOCKER_HUB_ACCOUNT}/${APP_NAME}:latest" .
 	mkdir /tmp/caches
 	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/caches:/root/.cache/ aquasec/trivy image "$${DOCKER_HUB_ACCOUNT}/${APP_NAME}:${VERSION}"
 

@@ -16,7 +16,7 @@ COPY app/main.py /app
 COPY app/.env /app
 
 # Install dependencies
-RUN pip install requests
+RUN pip install requests python-dotenv
 
 # Start program during container creation
 CMD ["python", "main.py"]
