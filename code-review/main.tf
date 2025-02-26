@@ -4,7 +4,7 @@
 #----------------------
 
 # SUGGESTION-0 => The original code have not a variables.tf file to customize the values according different environments.
-# I created the variables.tf and output.tf files, to respectively pass arguments and see results
+# I created the variables.tf, terraform.tfvars and output.tf files, to respectively pass arguments and see results
 
 # SUGGESTION-1 => The original code not follow the style code like identation recomended by official documentation
 # I used terraform fmt to fix this. Reference: https://developer.hashicorp.com/terraform/cli/commands/fmt

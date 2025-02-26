@@ -46,7 +46,7 @@ export BUCKET_NAME="terraform-remote-state-${SUFFIX}"
 export DYNAMODB_NAME="terraform-state-lock-dynamo-${SUFFIX}"
 ```
 
-- Change values in ``variables.tf`` file.
+- Change values in ``terraform.tfvars`` file.
 
 - For create key pair RSA for EKS cluster:
 
